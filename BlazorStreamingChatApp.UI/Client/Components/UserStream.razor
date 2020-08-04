@@ -1,0 +1,25 @@
+﻿@using BlazorStreamingChatApp.Core.Entities
+@inject IJSRuntime JSRuntime;
+
+<video @ref="videoElement" autoplay="true" width="320" height="240" id="test" @onloadedmetadata="PlayVideo">
+</video>
+
+@code {
+    [Parameter]
+    public ChatUser User { get; set; }
+
+    private ElementReference videoElement;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("clientHandler.startVideo", videoElement);
+        }
+    }
+
+    public async Task PlayVideo(EventArgs e)
+    {
+        await JSRuntime.InvokeVoidAsync("clientHandler.playVideo", videoElement, e);
+    }
+}

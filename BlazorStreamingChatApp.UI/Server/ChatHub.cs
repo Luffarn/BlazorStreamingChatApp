@@ -1,0 +1,25 @@
+﻿namespace BlazorSignalRApp.Server.Hubs
+{
+    using BlazorStreamingChatApp.Core.Entities;
+    using Microsoft.AspNetCore.SignalR;
+    using System;
+    using System.Threading.Tasks;
+
+    public class ChatHub : Hub
+    {
+        public async Task SendMessage(string user, string message)
+        {
+            await Clients.All.SendAsync("ReceiveMessage", user, message);
+        }
+
+        public async Task ConnectUser(string userName)
+        {
+            var user = new ChatUser
+            {
+                Id = Guid.NewGuid(),
+                Name = userName
+            };
+            await Clients.All.SendAsync("UserConnected", user);
+        }
+    }
+}
