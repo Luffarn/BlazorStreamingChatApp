@@ -1,7 +1,7 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.SignalR.Client
 @using BlazorStreamingChatApp.UI.Client.Components
-@using BlazorStreamingChatApp.Core.Entities
+@using BlazorStreamingChatApp.Core.Chat.Entities
 @inject NavigationManager NavigationManager
 @implements IDisposable
 
@@ -22,8 +22,6 @@
 
 
 <hr>
-
-<ChatRoom ChatUsers="@users" />
 
 <ul id="messagesList">
     @foreach (var message in messages)

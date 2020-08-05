@@ -1,6 +1,6 @@
 ﻿namespace BlazorSignalRApp.Server.Hubs
 {
-    using BlazorStreamingChatApp.Core.Entities;
+    using BlazorStreamingChatApp.Core.Chat.Entities;
     using Microsoft.AspNetCore.SignalR;
     using System;
     using System.Threading.Tasks;

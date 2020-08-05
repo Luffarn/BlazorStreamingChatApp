@@ -1,0 +1,29 @@
+﻿@page "/chat/{Id:guid}"
+
+@using BlazorStreamingChatApp.Core.Chat.Entities
+@using BlazorStreamingChatApp.UI.Client.Components
+@using BlazorStreamingChatApp.Core.Chat.Interfaces
+
+@inject IChatRoomHandler ChatRoomHandler
+
+<div class="chat-room container">
+    @foreach (var user in _chatUsers)
+    {
+        <UserStream User="@user" />
+    }
+</div>
+
+@code {
+    private List<ChatUser> _chatUsers { get; set; }
+
+    [Parameter]
+    public Guid Id { get; set; }
+
+    public ChatRoom _chatRoom { get; set; }
+
+    protected override void OnInitialized()
+    {
+        _chatRoom = ChatRoomHandler.GetChatRoom(Id);
+        _chatUsers = _chatRoom.Users;
+    }
+}

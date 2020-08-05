@@ -1,0 +1,40 @@
+﻿@page "/joinChat"
+@using BlazorStreamingChatApp.Core.Chat.Entities
+@using BlazorStreamingChatApp.Core.Chat.Interfaces
+@inject NavigationManager NavigationManager
+@inject IChatRoomHandler ChatRoomHandler
+
+
+<h3>Join Chat</h3>
+
+<div class="form-group">
+    <label for="userName">User name</label>
+    <input id="userName" placeholder="userName" @bind="name" />
+</div>
+<button class="btn btn-default" @onclick="(e) => CreateRoom(e)">Create chat room</button>
+
+@code {
+    private string name;
+    private string chatId;
+    private string chatRoomName;
+
+    private void CreateRoom(MouseEventArgs e)
+    {
+        var creator = new ChatUser
+        {
+            Id = Guid.NewGuid(),
+            Name = name
+        };
+
+        var chatRoom = new ChatRoom
+        {
+            Id = Guid.NewGuid(),
+            ChatRoomName = chatRoomName,
+            Users = new List<ChatUser>() { creator }
+        };
+
+        ChatRoomHandler.AddChatRoom(chatRoom);
+
+        NavigationManager.NavigateTo($"chat/{chatRoom.Id}");
+    }
+}
