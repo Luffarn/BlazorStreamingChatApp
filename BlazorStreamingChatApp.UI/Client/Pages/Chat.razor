@@ -2,9 +2,10 @@
 
 @using BlazorStreamingChatApp.Core.Chat.Entities
 @using BlazorStreamingChatApp.UI.Client.Components
-@using BlazorStreamingChatApp.Core.Chat.Interfaces
+@using Microsoft.AspNetCore.SignalR.Client
 
-@inject IChatRoomHandler ChatRoomHandler
+@inject NavigationManager NavigationManager
+@inject HttpClient Http
 
 <div class="chat-room container">
     @foreach (var user in _chatUsers)
@@ -14,16 +15,29 @@
 </div>
 
 @code {
-    private List<ChatUser> _chatUsers { get; set; }
+    private List<ChatUser> _chatUsers { get; set; } = new List<ChatUser>();
+    private HubConnection hubConnection;
 
     [Parameter]
     public Guid Id { get; set; }
 
     public ChatRoom _chatRoom { get; set; }
 
-    protected override void OnInitialized()
+
+    protected override async Task OnInitializedAsync()
     {
-        _chatRoom = ChatRoomHandler.GetChatRoom(Id);
+        _chatRoom = await Http.GetFromJsonAsync<ChatRoom>($"chat?id={Id}");
         _chatUsers = _chatRoom.Users;
+
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
+            .Build();
+
+        hubConnection.On<ChatUser>("UserConnected", (user) =>
+        {
+            StateHasChanged();
+        });
+
+        await hubConnection.StartAsync();
     }
 }

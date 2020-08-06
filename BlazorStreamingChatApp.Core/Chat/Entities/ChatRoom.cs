@@ -8,5 +8,10 @@
         public Guid Id { get; set; }
         public string ChatRoomName { get; set; }
         public List<ChatUser> Users { get; set; }
+
+        public void AddUser(ChatUser user)
+        {
+            Users.Add(user);
+        }
     }
 }
