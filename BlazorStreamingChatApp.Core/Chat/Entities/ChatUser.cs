@@ -1,4 +1,4 @@
-﻿namespace BlazorStreamingChatApp.Core.Entities
+﻿namespace BlazorStreamingChatApp.Core.Chat.Entities
 {
     using System;
 

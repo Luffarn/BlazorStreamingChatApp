@@ -1,0 +1,79 @@
+﻿@page "/joinChat"
+@using BlazorStreamingChatApp.Core.Chat.Entities
+@using BlazorStreamingChatApp.Core.Chat
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager NavigationManager
+@inject HttpClient Http
+
+<div class="container">
+    <h3>Create chat</h3>
+    <div class="form-group">
+        <label for="userName">User name</label>
+        <input id="userName" placeholder="userName" @bind="name" />
+    </div>
+    <button class="btn btn-primary" @onclick="(e) => CreateRoom(e)">Create chat room</button>
+</div>
+
+<div class="container">
+    <h3>Join Chat</h3>
+    <div class="form-group">
+        <label for="userName">User name</label>
+        <input id="userName" placeholder="userName" @bind="name" />
+    </div>
+    <div class="form-group">
+        <label for="chatId">Chat id</label>
+        <input id="chatId" placeholder="chatId" @bind="chatId" />
+    </div>
+    <button class="btn btn-primary" @onclick="(e) => JoinRoom(e)">Join chat room</button>
+</div>
+
+@code {
+    private string name;
+    private string chatId;
+    private string chatRoomName;
+    private HubConnection hubConnection;
+
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+           .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
+           .Build();
+
+        await hubConnection.StartAsync();
+    }
+
+    private async Task CreateRoom(MouseEventArgs e)
+    {
+        var creator = new ChatUser
+        {
+            Id = Guid.NewGuid(),
+            Name = name
+        };
+
+        var chatRoom = new ChatRoom
+        {
+            Id = Guid.NewGuid(),
+            ChatRoomName = chatRoomName,
+            Users = new List<ChatUser>() { creator }
+        };
+        await Http.PostAsJsonAsync("chat", chatRoom);
+        NavigationManager.NavigateTo($"chat/{chatRoom.Id}");
+    }
+
+    private async Task JoinRoom(MouseEventArgs e)
+    {
+        var user = new ChatUser
+        {
+            Id = Guid.NewGuid(),
+            Name = name
+        };
+
+        var chatRoom = await Http.GetFromJsonAsync<ChatRoom>("chat");
+
+        await ConnectUser(chatRoom.Id);
+        NavigationManager.NavigateTo($"chat/{chatRoom.Id}");
+    }
+
+    Task ConnectUser(Guid chatRoomId) =>
+        hubConnection.SendAsync("ConnectUser", name, chatRoomId);
+}

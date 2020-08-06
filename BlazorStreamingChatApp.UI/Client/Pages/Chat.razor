@@ -1,0 +1,43 @@
+﻿@page "/chat/{Id:guid}"
+
+@using BlazorStreamingChatApp.Core.Chat.Entities
+@using BlazorStreamingChatApp.UI.Client.Components
+@using Microsoft.AspNetCore.SignalR.Client
+
+@inject NavigationManager NavigationManager
+@inject HttpClient Http
+
+<div class="chat-room container">
+    @foreach (var user in _chatUsers)
+    {
+        <UserStream User="@user" />
+    }
+</div>
+
+@code {
+    private List<ChatUser> _chatUsers { get; set; } = new List<ChatUser>();
+    private HubConnection hubConnection;
+
+    [Parameter]
+    public Guid Id { get; set; }
+
+    public ChatRoom _chatRoom { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        _chatRoom = await Http.GetFromJsonAsync<ChatRoom>($"chat?id={Id}");
+        _chatUsers = _chatRoom.Users;
+
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
+            .Build();
+
+        hubConnection.On<ChatUser>("UserConnected", (user) =>
+        {
+            StateHasChanged();
+        });
+
+        await hubConnection.StartAsync();
+    }
+}
