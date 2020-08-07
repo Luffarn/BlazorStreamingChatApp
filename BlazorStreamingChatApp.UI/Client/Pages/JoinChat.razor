@@ -62,18 +62,15 @@
 
     private async Task JoinRoom(MouseEventArgs e)
     {
-        var user = new ChatUser
-        {
-            Id = Guid.NewGuid(),
-            Name = name
-        };
-
-        var chatRoom = await Http.GetFromJsonAsync<ChatRoom>("chat");
-
-        await ConnectUser(chatRoom.Id);
-        NavigationManager.NavigateTo($"chat/{chatRoom.Id}");
+        await ConnectUser(Guid.Parse(chatId));
+        NavigationManager.NavigateTo($"chat/{chatId}");
     }
 
     Task ConnectUser(Guid chatRoomId) =>
         hubConnection.SendAsync("ConnectUser", name, chatRoomId);
+
+    public void Dispose()
+    {
+        _ = hubConnection.DisposeAsync();
+    }
 }

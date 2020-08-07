@@ -2,13 +2,19 @@
 {
     using BlazorStreamingChatApp.Core.Chat;
     using BlazorStreamingChatApp.Core.Chat.Entities;
-    using BlazorStreamingChatApp.UI.Server.DataStore;
     using Microsoft.AspNetCore.SignalR;
     using System;
     using System.Threading.Tasks;
 
     public class ChatHub : Hub
     {
+        private readonly IChatHandler chatHandler;
+
+        public ChatHub(IChatHandler chatHandler)
+        {
+            this.chatHandler = chatHandler;
+        }
+
         public async Task SendMessage(string user, string message)
         {
             await Clients.All.SendAsync("ReceiveMessage", user, message);
@@ -22,7 +28,7 @@
                 Name = userName
             };
 
-            var chatRoom = ChatHandler.GetChat(chatRoomId);
+            var chatRoom = chatHandler.GetChat(chatRoomId);
             chatRoom.AddUser(user);
 
             await Clients.All.SendAsync("UserConnected", user);

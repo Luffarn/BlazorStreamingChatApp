@@ -1,5 +1,5 @@
-﻿using BlazorStreamingChatApp.Core.Chat.Entities;
-using BlazorStreamingChatApp.UI.Server.DataStore;
+﻿using BlazorStreamingChatApp.Core.Chat;
+using BlazorStreamingChatApp.Core.Chat.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System;
@@ -12,23 +12,26 @@ namespace BlazorStreamingChatApp.UI.Server.Controllers
     public class ChatController : ControllerBase
     {
         private readonly ILogger<ChatController> logger;
+        private readonly IChatHandler chatHandler;
 
-        public ChatController(ILogger<ChatController> logger)
+        public ChatController(ILogger<ChatController> logger,
+                              IChatHandler chatHandler)
         {
             this.logger = logger;
+            this.chatHandler = chatHandler;
         }
 
         [HttpGet]
         public ChatRoom GetRoom(Guid id)
         {
-            var chatRoom = ChatHandler.GetChat(id);
+            var chatRoom = chatHandler.GetChat(id);
             return chatRoom;
         }
 
         [HttpPost]
         public void AddRoom(ChatRoom room)
         {
-            ChatHandler.AddRoom(room);
+            chatHandler.AddRoom(room);
         }
     }
 }

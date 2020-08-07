@@ -1,8 +1,10 @@
 ﻿@using BlazorStreamingChatApp.Core.Chat.Entities
 @inject IJSRuntime JSRuntime;
 
-<video @ref="videoElement" autoplay="true" width="320" height="240" id="test" @onloadedmetadata="PlayVideo">
-</video>
+<div class="chat-user">
+    <h2>@User.Name</h2>
+    <video @ref="videoElement" autoplay="autoplay" width="320" height="240" id="test" @onloadedmetadata="PlayVideo"></video>
+</div>
 
 @code {
     [Parameter]
