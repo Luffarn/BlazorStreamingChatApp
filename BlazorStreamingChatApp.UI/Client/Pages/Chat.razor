@@ -7,15 +7,17 @@
 @inject NavigationManager NavigationManager
 @inject HttpClient Http
 
+<h1 @bind="headingStyle">
+    Connected
+</h1>
 <div class="chat-room container">
-    @foreach (var user in _chatUsers)
+    @foreach (var user in _chatRoom?.Users ?? new List<ChatUser>())
     {
         <UserStream User="@user" />
     }
 </div>
 
 @code {
-    private List<ChatUser> _chatUsers { get; set; } = new List<ChatUser>();
     private HubConnection hubConnection;
 
     [Parameter]
@@ -23,21 +25,37 @@
 
     public ChatRoom _chatRoom { get; set; }
 
+    private string headingStyle
+                => IsConnected ? "display: block" : "display: none";
 
     protected override async Task OnInitializedAsync()
     {
         _chatRoom = await Http.GetFromJsonAsync<ChatRoom>($"chat?id={Id}");
-        _chatUsers = _chatRoom.Users;
 
         hubConnection = new HubConnectionBuilder()
             .WithUrl(NavigationManager.ToAbsoluteUri("/chathub"))
             .Build();
 
-        hubConnection.On<ChatUser>("UserConnected", (user) =>
+        hubConnection.On<ChatUser>("UserConnected", async (user) =>
         {
+            _chatRoom = await Http.GetFromJsonAsync<ChatRoom>($"chat?id={Id}");
             StateHasChanged();
         });
 
         await hubConnection.StartAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        _chatRoom = await Http.GetFromJsonAsync<ChatRoom>($"chat?id={Id}");
+        StateHasChanged();
+    }
+
+    public bool IsConnected =>
+    hubConnection.State == HubConnectionState.Connected;
+
+    public void Dispose()
+    {
+        _ = hubConnection.DisposeAsync();
     }
 }
